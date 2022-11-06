@@ -9,5 +9,7 @@
 date()
 
 ```
-The text continues here.
+Hi all, I am Johannes. I am a master student at the educational faculty and a research assistant. I am planning on applying for PHD studies after my graduation (which is hopefully soon). I did use R in my masters thesis, but I am hoping to learn more.
+
+https://github.com/murgnar2/IODS-project
 
