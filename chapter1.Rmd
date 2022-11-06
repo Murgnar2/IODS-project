@@ -3,11 +3,15 @@
 
 *Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
 
+Hi all, I am Johannes. I am a master student at the educational faculty and a research assistant. I am planning on applying for PHD studies after my graduation (which is hopefully soon). I did use R in my masters thesis, but I am hoping to learn more.
+
+https://github.com/murgnar2/IODS-project
+
+
 ```{r}
 # This is a so-called "R chunk" where you can write R code.
 
 date()
 
 ```
-The text continues here.
 
