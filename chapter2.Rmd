@@ -11,3 +11,63 @@ date()
 ```
 
 Here we go again...
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(GGally)
+
+
+students2014 <- read_csv("C:/LocalData/gale/R/IODS-project2/Data/learning2014.csv")
+
+str(students2014)
+dim(students2014)
+head(students2014)
+
+```
+
+#Part1: The dataset composes of 166 separete anserws to 7 different variables of wich there is gender, age, exam points and the rest are sum variables.
+
+
+```{r}
+
+p <- ggpairs(students2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+p
+
+```
+
+
+```{r}
+
+summary(students2014)
+
+
+```
+#Part2 As we can see from the graphical overview of the data, we shoudl note that there is a lot more Females than Males. Also the participants seem to be quite young with mean at 25.51. Exam points and attitude seems to have a significant correlation between them at 0.437. 
+
+
+```{r}
+
+ggpairs(students2014, lower = list(combo = wrap("facethist", bins = 20)))
+
+my_model <- lm(Points ~ attitude, data = students2014)
+
+
+summary(my_model)
+
+```
+#Part3 and Part4 Notable things are the statistically significant connection between attitude in the model. Intercept is also sligthly less significant. After deleting the explanatory variables that had no statistical significancy were removed, the intercept became statistically significant as well and the model improved. We can reject the null hypothesis thanks to the significance level. R-squared is reported at 19% so the variable explains almost 1/5th of the variability observed in the target variable is explained by the regression model. This of course is not very much.
+
+```{r}
+
+par(mfrow = c(2,2))
+
+plot(my_model, which = c(1,2,5))
+
+```
+#Part5 Residuals vs fitted plot seems to indicate that a linear relationship between the variables is reasonably expected as the residuals are not far from the o-line. There might be outliers though as some do stand out as far as -20. From the normal Q-Q plot we can deduct that the data is normally distributed as the line falls around  45degrees. No influental data points seem to be affecting the results as the red line falls to the 0-line. This all would impilcate that the model seems to be working very well. 
+
+
+
