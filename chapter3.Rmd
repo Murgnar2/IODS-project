@@ -1,0 +1,132 @@
+---
+title: "chapter3"
+author: "Johannes"
+date: "2022-11-21"
+output: 
+  html_document:
+    theme: flatly
+    highlight: haddock
+    toc: true
+    toc_depth: 2
+    number_section: false
+---
+
+Libraries
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(corrr)
+library(sjPlot)
+
+```
+
+reading data
+
+```{r}
+alc <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/alc.csv", sep = ",", header = TRUE)
+
+str(alc)
+colnames(alc)
+
+```
+The data has 370 obs. of  35 variables with a lot of different measures. Including alcohol use of students in secondary education of two Portuguese schools.
+
+My hypothesis is that high freetime has a positive correlation with high alcohol use, I have the same hypothesis for absences. I'm guessing a negative correlation to alcohol if student wants to reach higher education level. I'm also hypothesising a negative correlation with having a romantic relationship
+
+```{r}
+g2 <- ggplot(alc, aes(x = high_use, y = absences,))
+
+g2 + geom_boxplot() + ggtitle("High use and absences")
+
+g1 <- ggplot(data = alc, aes(x = high_use))
+
+g1 + geom_bar(aes(fill = absences))
+
+tab_xtab(var.row = alc$high_use, var.col = alc$ab,
+         title = "Title", show.row.prc = TRUE)
+
+table(high_use = alc$high_use, absences = alc$absences) %>% prop.table() %>% addmargins()
+
+
+```
+
+
+
+```{r}
+
+g2 <- ggplot(alc, aes(x = high_use, y = freetime,))
+
+g2 + geom_boxplot() + ggtitle("High use and freetime")
+
+g1 <- ggplot(data = alc, aes(x = high_use))
+
+g1 + geom_bar(aes(fill = absences))
+
+tab_xtab(var.row = alc$high_use, var.col = alc$freetime,
+         title = "Title", show.row.prc = TRUE)
+
+
+table(high_use = alc$high_use, freetime = alc$freetime) %>% prop.table() %>% addmargins()
+
+
+```
+
+
+
+
+
+```{r}
+
+g2 <- ggplot(alc, aes(x = high_use, y = higher,))
+
+g2 + geom_boxplot() + ggtitle("High use and higher")
+
+g1 <- ggplot(data = alc, aes(x = high_use))
+
+g1 + geom_bar(aes(fill = higher))
+
+tab_xtab(var.row = alc$high_use, var.col = alc$higher,
+         title = "Title", show.row.prc = TRUE)
+
+
+table(high_use = alc$high_use, higher = alc$higher) %>% prop.table() %>% addmargins()
+
+```
+
+```{r}
+
+
+g2 <- ggplot(alc, aes(x = high_use, y = romantic,))
+
+g2 + geom_boxplot() + ggtitle("High use and romantic")
+
+g1 <- ggplot(data = alc, aes(x = high_use))
+
+g1 + geom_bar(aes(fill = romantic))
+
+tab_xtab(var.row = alc$high_use, var.col = alc$romantic,
+         title = "Title", show.row.prc = TRUE)
+
+
+table(high_use = alc$high_use, higher = alc$romantic) %>% prop.table() %>% addmargins()
+
+
+```
+
+```{r}
+test <- c("high_use","absences", "freetime", "higher", "romantic")
+
+data2 <- select(alc, one_of(test))
+
+glimpse(test)
+
+p <- ggpairs(data2, mapping = aes(col = high_use, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+p
+```
+
+
+
