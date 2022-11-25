@@ -11,6 +11,8 @@ output:
     number_section: false
 ---
 
+# Chapter 3
+
 Libraries
 
 ```{r}
