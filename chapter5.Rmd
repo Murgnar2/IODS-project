@@ -1,0 +1,129 @@
+---
+title: "chapter5"
+author: "Johannes"
+date: "2022-12-05"
+output: html_document
+---
+
+# Chapter 5: Dimensionality reduction techniques
+
+* Analysis exercises
+
+```{r}
+#data and library
+library(stringr)
+library(GGally)
+library(corrplot)
+library(ggplot2)
+library(FactoMineR)
+library(tidyr)
+
+date()
+
+human <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/human2.txt", sep = ",", header = TRUE) 
+
+```
+
+```{r}
+names(human)
+```
+```{r}
+str(human)
+```
+
+```{r}
+
+summary(human)
+```
+There are 8 variables in the data.
+
+"GNI" = Gross National Income per capita
+"Life.Exp" = Life expectancy at birth
+"Mat.Mor" = Maternal mortality ratio
+"Ado.Birth" = Adolescent birth rate
+"Parli.F" = Percetange of female representatives in parliament
+"Edu2.FM" = Edu2.F / Edu2.M
+"Labo.FM" = Labo2.F / Labo2.M
+"Edu.Exp" = Expected years of schooling 
+
+```{r}
+ggpairs(human)
+
+```
+
+```{r}
+cor(human) %>% corrplot
+```
+
+We can see that strongest correlation is between Mat.Mor and Life.Exp. (-0.857) Second storngest correlation is between Life.Exp and Edu.Exp.(0.789) Not all variables have significant correlations.
+
+
+Principal component analysis (PCA) on the raw (non-standardized) human data
+```{r}
+pca_human <- prcomp(human)
+
+s <- summary(pca_human)
+pca_pr1 <- round(100*s$importance[2,], digits = 1)
+pc_lab1 <- paste0(names(pca_pr1), " (", pca_pr1, "%)")
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab1[1], ylab = pc_lab1[2])
+
+
+```
+
+Principal component analysis (PCA) on standardized human data
+
+```{r}
+
+human_std <- scale(human)
+
+pca_human_std <- prcomp(human_std)
+s2 <- summary(pca_human_std)
+pca_pr2 <- round(100*s2$importance[2,], digits = 1)
+pc_lab2 <- paste0(names(pca_pr2), " (", pca_pr2, "%)")
+
+biplot(pca_human_std, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab2[1], ylab = pc_lab2[2])
+
+```
+
+It seems that with non-standardized data PC1 explains 100% and with the standardized data PC1 explains 53.6% and PC2 is explains 16.2%. This means that the standardized data gives more accurate results
+
+
+Read the tea data
+```{r}
+tea <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/tea.csv", stringsAsFactors = TRUE)
+str(tea)
+View(tea)
+```
+
+300 individuals were asked how they drink tea (18 questions) and what are their product's perception (12 questions). In addition, some personal details were asked (4 questions).The data composes of 300 observations of 36 variables
+
+```{r}
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+# select the 'keep_columns' to create a new dataset
+tea_time <- dplyr::select(tea, keep_columns)
+
+# look at the summaries and structure of the data
+summary(tea_time)
+
+
+```
+
+```{r}
+str(tea_time)
+```
+
+```{r}
+mca <- MCA(tea_time, graph = FALSE)
+
+summary(mca)
+
+```
+
+```{r}
+plot(mca, invisible=c("ind"), graph.type = "classic", habillage = "quali")
+
+```
+Here we can see that certain variables are more connected together. Unpackaged tea an is more likely drank in tea shop. Also tea bags are more likely drank in a chain store. 
+
+
