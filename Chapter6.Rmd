@@ -1,0 +1,171 @@
+---
+title: "chapter6"
+author: "Johannes"
+date: "2022-12-09"
+output: html_document
+---
+
+# Chapter 6: Analysis of longitudinal data
+
+```{r}
+date()
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+library(corrplot)
+
+```
+
+
+#Loading RATS data and begining analyses 
+```{r}
+RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", header = TRUE, sep = '\t')
+glimpse(RATS)
+
+RATS$ID <- factor(RATS$ID)
+RATS$Group <- factor(RATS$Group)
+
+RATSL <- pivot_longer(RATS, cols = -c(ID, Group), 
+                      names_to = "WD",
+                      values_to = "Weight") %>% 
+         mutate(Time = as.integer(substr(WD, 3,4))) %>%
+         arrange(Time)
+
+glimpse(RATSL)
+```
+#Rats data is a nutrional study with three different groups. The rats where followed for 9 weeks.
+
+```{r}
+ggplot(RATSL, aes(x = Time, y = Weight, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  scale_y_continuous(limits = c(min(RATSL$Weight), max(RATSL$Weight)))
+
+
+```
+#Here is we can see the 16 different rats by their groups. The weight of the rats increased over time within all groups. 
+
+```{r}
+# Standardising
+RATSL <- RATSL %>%
+  group_by(Group, Time) %>%
+  mutate(stdWeight = (Weight - mean(Weight))/sd(Weight) ) %>%
+  ungroup()
+
+glimpse(RATSL)
+```
+
+```{r}
+#Plotting again
+ggplot(RATSL, aes(x = Time, y = stdWeight, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  scale_y_continuous(name = "standardized weight")
+
+
+```
+#The standardized analys shows more variety in the weights of the rats.
+
+```{r}
+
+
+RATSS <- RATSL %>%
+  group_by(Group, Time) %>%
+  summarise(mean = mean(Weight), se = sd(Weight)/sqrt(n)) %>%
+  ungroup()
+
+glimpse(RATSS)
+
+```
+
+```{r}
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=2) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  scale_y_continuous(name = "mean(weight) +/- se(weight)")
+
+
+```
+
+#Here we can see the mean profiles for the timepoints including standard error. Groups 2 and 3 wheight more and have a lot more variability throughout the experiment. 
+
+```{r}
+RATSL8S <- RATSL %>%
+  filter(Time > 0) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+glimpse(RATSL8S)
+
+```
+
+```{r}
+ggplot(RATSL8S, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(Weight), Time")
+```
+#Lets filter the outliers 
+
+```{r}
+RATSL8S1 <- RATSL8S %>%
+  filter((Group==1 & mean > 250)|(Group==2 & mean < 500)| (Group==3 & mean > 500))
+
+ggplot(RATSL8S1, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(Weight), Time")
+
+
+```
+
+#Now lets do an Anova
+
+
+```{r}
+RATSL8S2 <- RATSL8S1 %>%
+  mutate(baseline = RATS$WD)
+
+fit <- lm(mean ~ Group, data = RATSL8S2)
+
+anova(fit)
+
+```
+#As we can see the F-value is statistically significant, se we can conclude that there is a difference between the groups.
+
+#BPRS
+
+```{r}
+#loading data and making ready for analyses
+
+BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep  =" ", header = T)
+
+BPRS$treatment <- factor(BPRS$treatment)
+BPRS$subject <- factor(BPRS$subject)
+
+BPRSL <-  BPRS %>% gather(key = weeks, value = bprs, -treatment, -subject)
+BPRSL <-  BPRSL %>% mutate(week = as.integer(substr(weeks,5,5)))
+
+glimpse(BPRSL)
+
+```
+
+```{r}
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both)
+```
+
+#Here we can see the visualisation of 40 male participants who took part in experiment to see how two different treatments affect bprs. 
+
